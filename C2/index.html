@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compare Image</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        :root {
+            --left: 50%;
+        }
+
+        main {
+            position: relative;
+            width: 960px;
+            aspect-ratio: 16 / 11;
+        }
+
+        img {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            user-select: none;
+            pointer-events: pointer;
+        }
+        
+        #grayscale {
+            filter: grayscale(1);
+        }
+        
+        #normal {
+            z-index: 1;
+            clip-path: polygon(var(--left) 0, 100% 0, 100% 100%, var(--left) 100%);
+        }
+        
+        #draggable {
+            position: absolute;
+            z-index: 10;
+            height: 100%;
+            width: 4px;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,.2);
+            cursor: pointer;
+            left: var(--left);
+            translate: -50%;
+        }
+
+        #draggable::after{
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 35px;
+            height: 35px;
+            translate: -50% -50%;
+            border-radius: 50%;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,.2);
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <img src="image.webp" alt="grayscale-image" id="grayscale" draggable="false">
+        <img src="image.webp" alt="normal-image" id="normal" draggable="false">
+        <div id="draggable"></div>
+    </main>
+
+    <script>
+        const main = document.querySelector('main');
+        const draggable = document.querySelector('#draggable');
+
+        const setup = {
+            x: 0,
+            left: 50,
+            move: false
+        }
+
+        draggable.addEventListener('mousedown', function(e){
+            setup.move = true;
+            setup.x = e.clientX;
+        });
+
+        addEventListener('mouseup', function(e){
+            setup.move = false;
+        });
+
+        addEventListener('mousemove', function(e){
+            if(!setup.move) return;
+            const xDiff = e.clientX - setup.x;
+            const xDiffInPercentage = (xDiff / main.clientWidth) * 100;
+            setup.left += xDiffInPercentage;
+
+            if(setup.left <= 0){
+                setup.left = 0;
+            }else if(setup.left >= 100){
+                setup.left = 100;
+            }
+            document.documentElement.style.setProperty('--left', setup.left + '%');
+            setup.x = e.clientX;
+        });
+
+    </script>
+</body>
+</html>
